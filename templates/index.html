@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MTA Fulton Station - Uptown Trains</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .train-board {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 60px;
+        }
+        
+        .board-header {
+            display: grid;
+            grid-template-columns: 200px 1fr 300px;
+            padding: 25px 40px;
+            background-color: #1a1a1a;
+            border-bottom: 3px solid #ffa500;
+            font-weight: bold;
+            font-size: 32px;
+            color: #ffa500;
+            margin-bottom: 20px;
+        }
+        
+        .train-row {
+            display: grid;
+            grid-template-columns: 200px 1fr 300px;
+            padding: 35px 40px;
+            border-bottom: 2px solid #333;
+            align-items: center;
+            background-color: #0a0a0a;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease;
+            border-radius: 8px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .train-row:hover {
+            background-color: #1a1a1a;
+            transform: scale(1.01);
+        }
+        
+        .train-route {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .route-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 48px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+        }
+        
+        .route-A, .route-C, .route-E { 
+            background-color: #0039A6;
+            color: white;
+        }
+        .route-4, .route-5, .route-6 { 
+            background-color: #00933C;
+            color: white;
+        }
+        .route-1, .route-2, .route-3 { 
+            background-color: #EE352E;
+            color: white;
+        }
+        
+        .destination {
+            font-size: 40px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .train-time {
+            text-align: right;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffa500;
+            text-shadow: 0 0 15px rgba(255, 165, 0, 0.6);
+        }
+        
+        .arriving {
+            color: #ff4444;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+        
+        .footer {
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 3px solid #333;
+            font-size: 24px;
+            color: #888;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 80px;
+            font-size: 40px;
+            color: #888;
+        }
+        
+        .no-trains {
+            text-align: center;
+            padding: 80px;
+            font-size: 40px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="train-board">
+        <div class="board-header">
+            <div>LINE</div>
+            <div>DESTINATION</div>
+            <div>ARRIVES</div>
+        </div>
+        <div id="trainList">
+            <div class="loading">Loading train data...</div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div>Live MTA Data</div>
+        <div id="lastUpdate">Connecting...</div>
+    </div>
+    
+    <script>
+        function updateTrains() {
+            fetch('/api/trains')
+                .then(response => response.json())
+                .then(trains => {
+                    const listDiv = document.getElementById('trainList');
+                    
+                    if (trains.length === 0) {
+                        listDiv.innerHTML = '<div class="no-trains">No upcoming trains</div>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    // Show top 7 trains (fits well without header)
+                    trains.slice(0, 7).forEach(train => {
+                        const timeStr = train.minutes === 0 ? 'Arriving' : train.minutes + ' min';
+                        const timeClass = train.minutes === 0 ? 'arriving' : '';
+                        const destination = train.destination || train.direction;
+                        
+                        html += `
+                            <div class="train-row">
+                                <div class="train-route">
+                                    <div class="route-circle route-${train.route}">${train.route}</div>
+                                </div>
+                                <div class="destination">${destination}</div>
+                                <div class="train-time ${timeClass}">${timeStr}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    listDiv.innerHTML = html;
+                    
+                    const now = new Date();
+                    document.getElementById('lastUpdate').textContent = 
+                        'Updated: ' + now.toLocaleTimeString();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('trainList').innerHTML = 
+                        '<div class="no-trains">Error loading trains</div>';
+                });
+        }
+        
+        // Update immediately and then every 30 seconds
+        updateTrains();
+        setInterval(updateTrains, 30000);
+    </script>
+</body>
+</html>
