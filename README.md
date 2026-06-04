@@ -119,7 +119,7 @@ mta-realtime-tracker/
 
 **Carlos Fabrega**
 - GitHub: [@carlos-fabrega](https://github.com/carlos-fabrega)
-- LinkedIn: [Carlos Fabrega](https://linkedin.com/in/carlosfabrega)
+- LinkedIn: [Carlos Fabrega](https://linkedin.com/in/carlosfabrega0)
 
 ## License
 
