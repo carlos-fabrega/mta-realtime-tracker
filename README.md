@@ -52,13 +52,11 @@ Access at `http://localhost:5000`
 6. Configure display scheduling with crontab
 
 ## Project Structure
-mta-realtime-tracker/
-├── mta_server.py              # Flask backend + MTA API integration
-├── templates/
-│   └── index.html             # Web interface with real-time updates
-├── display-control.sh         # Script for display on/off control
-├── README.md
-└── .gitignore
+
+- **mta_server.py** - Flask backend server that fetches MTA GTFS-realtime data and serves JSON API
+- **templates/index.html** - Web interface with real-time updates, auto-refresh every 30 seconds
+- **display-control.sh** - Script to control HDMI display power for scheduling
+- **README.md** - Project documentation and setup guide
 
 ## How It Works
 
